@@ -1,5 +1,5 @@
 package fr.unilim.iut.spaceinvaders;
-//
+
 public class Dimension {
 	int longueur;
 	int hauteur;
