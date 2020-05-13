@@ -1,25 +1,50 @@
 package fr.unilim.iut.spaceinvaders;
 
+
+import fr.unilim.iut.spaceinvaders.moteurjeu.Commande;
+import fr.unilim.iut.spaceinvaders.moteurjeu.Jeu;
 import fr.unilim.iut.spaceinvaders.utils.DebordementEspaceJeuException;
 import fr.unilim.iut.spaceinvaders.utils.HorsEspaceJeuException;
+import fr.unilim.iut.spaceinvaders.utils.MissileException;
 
-public class SpaceInvaders {
-	//private static final char MARQUE_FIN_LIGNE = '\n';
-	//private static final char MARQUE_VAISSEAU = 'V';
+public class SpaceInvaders implements Jeu {
+	
 	int longueur;
 	int hauteur;
 	Vaisseau vaisseau;
+	Missile missile;
+	
+	
 
 	public SpaceInvaders(int longueur, int hauteur) {
 		this.longueur = longueur;
 		this.hauteur = hauteur;
 	}
 	
-	public void initialiserJeu() {
-		Position positionVaisseau = new Position(this.longueur/2,this.hauteur-1);
-		Dimension dimensionVaisseau = new Dimension(Constante.VAISSEAU_LONGUEUR, Constante.VAISSEAU_HAUTEUR);
-		positionnerUnNouveauVaisseau(dimensionVaisseau, positionVaisseau, Constante.VAISSEAU_VITESSE);
-	 }
+	
+	
+	  public Vaisseau getVaisseau() {
+			return this.vaisseau;
+		}
+	    
+	    public Missile getMissile() {
+			return this.missile;
+		}
+	    
+	    public void setMissile(Missile missile) {
+			this.missile = missile;
+		}
+	    
+	   
+	
+	
+	
+	    public void initialiserJeu() {
+			Position positionVaisseau = new Position(this.longueur/2,this.hauteur-1);
+			Dimension dimensionVaisseau = new Dimension(Constante.VAISSEAU_LONGUEUR, Constante.VAISSEAU_HAUTEUR);
+			positionnerUnNouveauVaisseau(dimensionVaisseau, positionVaisseau, Constante.VAISSEAU_VITESSE);
+			
+		 }
 
 	public void deplacerVaisseauVersLaDroite() {
 		if (vaisseau.abscisseLaPlusADroite() < (longueur - 1)) {
@@ -62,6 +87,37 @@ public class SpaceInvaders {
 			vaisseau = new Vaisseau(dimension,position,vitesse);
 		}
 
+	 public void tirerUnMissile(Dimension dimensionMissile, int vitesseMissile) {
+			
+		   if ((vaisseau.hauteur()+ dimensionMissile.hauteur()) > this.hauteur )
+			   throw new MissileException("Pas assez de hauteur libre entre le vaisseau et le haut de l'espace jeu pour tirer le missile");
+							
+		   this.missile = this.vaisseau.tirerUnMissile(dimensionMissile,vitesseMissile);
+     }
+	 
+	 @Override
+     public void evoluer(Commande commandeUser) {
+		
+        if (commandeUser.gauche) {
+            deplacerVaisseauVersLaGauche();
+        }
+		
+       if (commandeUser.droite) {
+	        deplacerVaisseauVersLaDroite();
+       }
+       if (commandeUser.tir && !this.aUnMissile())
+           tirerUnMissile(new Dimension(Constante.MISSILE_LONGUEUR, Constante.MISSILE_HAUTEUR),
+					Constante.MISSILE_VITESSE);
+     }
+
+ 
+    @Override
+    public boolean etreFini() {
+       return false; 
+    }
+
+  
+	 
 	@Override
 	public String toString() {
 		return recupererEspaceJeuDansChaineASCII();
@@ -82,17 +138,53 @@ public class SpaceInvaders {
 		char marque;
 		if (this.aUnVaisseauQuiOccupeLaPosition(x, y))
 			marque = Constante.MARQUE_VAISSEAU;
-		else
-			marque = '.';
+		else if (this.aUnMissileQuiOccupeLaPosition(x, y))
+				marque = Constante.MARQUE_MISSILE;
+		else marque = Constante.MARQUE_VIDE;
 		return marque;
 	}
 
-	private boolean aUnVaisseauQuiOccupeLaPosition(int x, int y) {
-		return this.aUnvaisseau() && vaisseau.occupeLaPosition(x, y);
+	private boolean aUnMissileQuiOccupeLaPosition(int x, int y) {
+		return this.aUnMissile() && missile.occupeLaPosition(x, y);
+
 	}
 
-	private boolean aUnvaisseau() {
+	private boolean aUnVaisseauQuiOccupeLaPosition(int x, int y) {
+		return this.aUnVaisseau() && vaisseau.occupeLaPosition(x, y);
+	}
+
+	public boolean aUnVaisseau() {
 		return vaisseau != null;
 	}
+	
+	public boolean aUnMissile() {
+		return missile != null;
+	}
+	
+public void deplacer(Commande c) {
+		
+		if (c.gauche)
+		{
+			this.deplacerVaisseauVersLaGauche();
+		}
+
+		if (c.droite)
+		{
+			this.deplacerVaisseauVersLaDroite();
+		}
+		
+	}
+
+public void deplacerMissile() {
+	
+	if(this.missile.ordonneeLaPlusHaute() <= 0) {
+		this.missile=null;
+	}
+	
+}
+
+
+
+
 
 }
