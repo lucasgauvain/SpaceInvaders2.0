@@ -287,4 +287,4 @@ import static org.junit.Assert.fail;
 	       ".....VVVVVVV...\n" , spaceinvaders.recupererEspaceJeuDansChaineASCII());
 	   }
 
-       }
+  }
