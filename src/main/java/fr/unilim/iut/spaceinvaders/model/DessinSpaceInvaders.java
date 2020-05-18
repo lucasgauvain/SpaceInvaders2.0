@@ -1,4 +1,4 @@
-package fr.unilim.iut.spaceinvaders;
+package fr.unilim.iut.spaceinvaders.model;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -51,7 +51,7 @@ public class DessinSpaceInvaders implements DessinJeu {
 	private void dessinerUnMissile(Missile missile, BufferedImage im) {
 		Graphics2D crayon = (Graphics2D) im.getGraphics();
 
-		crayon.setColor(Color.green);
+		crayon.setColor(Color.blue);
 		crayon.fillRect(missile.abscisseLaPlusAGauche(), missile.ordonneeLaPlusBasse(), missile.dimension.longueur, missile.dimension.hauteur);
 	}
 	

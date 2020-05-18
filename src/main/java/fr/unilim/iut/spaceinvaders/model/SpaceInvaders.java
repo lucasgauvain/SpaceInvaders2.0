@@ -1,6 +1,7 @@
-package fr.unilim.iut.spaceinvaders;
+package fr.unilim.iut.spaceinvaders.model;
 
 
+import fr.unilim.iut.spaceinvaders.model.Direction;
 import fr.unilim.iut.spaceinvaders.moteurjeu.Commande;
 import fr.unilim.iut.spaceinvaders.moteurjeu.Jeu;
 import fr.unilim.iut.spaceinvaders.utils.DebordementEspaceJeuException;
@@ -35,9 +36,6 @@ public class SpaceInvaders implements Jeu {
 			this.missile = missile;
 		}
 	    
-	   
-	
-	
 	
 	    public void initialiserJeu() {
 			Position positionVaisseau = new Position(this.longueur/2,this.hauteur-1);
@@ -98,16 +96,17 @@ public class SpaceInvaders implements Jeu {
 	 @Override
      public void evoluer(Commande commandeUser) {
 		
-        if (commandeUser.gauche) {
-            deplacerVaisseauVersLaGauche();
-        }
-		
-       if (commandeUser.droite) {
-	        deplacerVaisseauVersLaDroite();
-       }
-       if (commandeUser.tir && !this.aUnMissile())
-           tirerUnMissile(new Dimension(Constante.MISSILE_LONGUEUR, Constante.MISSILE_HAUTEUR),
-					Constante.MISSILE_VITESSE);
+		 this.deplacer(commandeUser);
+			
+			if (commandeUser.tir && ! this.aUnMissile()) {
+				tirerUnMissile(new Dimension(Constante.MISSILE_LONGUEUR, Constante.MISSILE_HAUTEUR), 
+						Constante.MISSILE_VITESSE);
+			}
+			
+			if(this.aUnMissile()) {
+				this.deplacerMissile();
+			}
+          
      }
 
  
@@ -161,7 +160,7 @@ public class SpaceInvaders implements Jeu {
 		return missile != null;
 	}
 	
-public void deplacer(Commande c) {
+	public void deplacer(Commande c) {
 		
 		if (c.gauche)
 		{
@@ -175,13 +174,15 @@ public void deplacer(Commande c) {
 		
 	}
 
-public void deplacerMissile() {
+	public void deplacerMissile() {
 	
-	if(this.missile.ordonneeLaPlusHaute() <= 0) {
-		this.missile=null;
+		this.missile.deplacerVerticalementVers(Direction.HAUT_ECRAN);
+		
+		if(this.missile.ordonneeLaPlusHaute() <= 0) {
+			this.missile=null;
+		}
+	
 	}
-	
-}
 
 
 

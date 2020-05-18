@@ -1,6 +1,6 @@
-package fr.unilim.iut.spaceinvaders;
+package fr.unilim.iut.spaceinvaders.model;
 
-//import com.sun.javafx.scene.traversal.Direction;
+
 
 public abstract class Sprite {
 
@@ -34,6 +34,11 @@ public abstract class Sprite {
 	public int longueur() {
 	       return this.dimension.longueur();
 	   }
+	
+	public int hauteur() {
+		return this.dimension.hauteur;
+		
+	}
 
 	public int ordonneeLaPlusBasse() {
 		    return this.origine.ordonnee() - this.dimension.hauteur() + 1;
@@ -63,10 +68,11 @@ public abstract class Sprite {
 		   this.origine.changerAbscisse(x);
 		   this.origine.changerOrdonnee(y);
 	  }
-	
+	/*
 	public void deplacerVersLeHaut() {
 		this.origine.changerOrdonnee(this.origine.ordonnee() - vitesse);
 	}
+	*/
 	
 	public void deplacerVerticalementVers(Direction direction) {
 		this.origine.changerOrdonnee(this.origine.ordonnee() + direction.valeur()*vitesse);

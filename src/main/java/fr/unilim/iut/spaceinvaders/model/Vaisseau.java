@@ -1,4 +1,4 @@
-package fr.unilim.iut.spaceinvaders;
+package fr.unilim.iut.spaceinvaders.model;
 
 import fr.unilim.iut.spaceinvaders.utils.MissileException;
 
@@ -28,13 +28,5 @@ public Position calculerLaPositionDeTirDuMissile(Dimension dimensionMissile) {
 	return positionOrigineMissile;
 }
 
-public int hauteur() {
-	return this.dimension.hauteur;
-	
-}
-
-public int longueur() {
-	return this.dimension.longueur();
-}
 
 }
