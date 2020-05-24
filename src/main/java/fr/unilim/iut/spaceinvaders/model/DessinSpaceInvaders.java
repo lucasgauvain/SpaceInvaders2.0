@@ -39,7 +39,7 @@ public class DessinSpaceInvaders implements DessinJeu {
 		Font font = new Font("Arial", Font.PLAIN, 15);
 		crayon.setFont(font);
 		crayon.setColor(Color.black);
-		crayon.drawString("F I N   D E   L A   P A R T I E", 210, 400);
+		crayon.drawString("F I N   D E   L A   P A R T I E", 180, 250);
 	}
 
 	private void dessinerUnVaisseau(Vaisseau vaisseau, BufferedImage im) {

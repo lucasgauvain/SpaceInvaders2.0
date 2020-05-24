@@ -1,19 +1,25 @@
 package fr.unilim.iut.spaceinvaders;
 
-    import static org.junit.Assert.assertEquals;
-    import org.junit.Test;
-    import org.junit.Before;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.junit.Before;
 
 import fr.unilim.iut.spaceinvaders.model.Dimension;
+import fr.unilim.iut.spaceinvaders.model.Direction;
+import fr.unilim.iut.spaceinvaders.model.Envahisseur;
+import fr.unilim.iut.spaceinvaders.model.Missile;
 import fr.unilim.iut.spaceinvaders.model.Position;
 import fr.unilim.iut.spaceinvaders.model.SpaceInvaders;
 import fr.unilim.iut.spaceinvaders.utils.DebordementEspaceJeuException;
 import fr.unilim.iut.spaceinvaders.utils.HorsEspaceJeuException;
 import fr.unilim.iut.spaceinvaders.utils.MissileException;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-    public class SpaceInvadersTest {
+public class SpaceInvadersTest {
 	
     	private SpaceInvaders spaceinvaders;
 
@@ -408,6 +414,99 @@ import static org.junit.Assert.fail;
 		     "...............\n" + 
 		     "...............\n" , spaceinvaders.recupererEspaceJeuDansChaineASCII());
 		}
-	   
-
-  }
+		
+		@Test
+		public void test_MissileNeTouchePasEnvahisseur() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(7, 5), 1));
+			
+			assertFalse(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurParLeBas() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(7, 5), 1));
+			
+			spaceinvaders.getMissile().deplacerVerticalementVers(Direction.BAS);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoinEnBasADroite() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(5, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(8, 5), 1));
+			
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.DROITE);
+			spaceinvaders.getMissile().deplacerVerticalementVers(Direction.BAS);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoinEnBasAGauche() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(5, 5), 1));
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.GAUCHE);
+			spaceinvaders.getMissile().deplacerVerticalementVers(Direction.BAS);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoteGauche() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,4), new Position(5, 3), 1));
+			
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.GAUCHE);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoteDroite() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,4), new Position(9, 3), 1));
+			
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.DROITE);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoinEnHautAGauche() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(5, 1), 1));
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.GAUCHE);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileToucheEnvahisseurEnDeplacementParLeCoinEnHautADroite() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(9, 1), 1));
+			spaceinvaders.getEnvahisseur().deplacerHorizontalementVers(Direction.DROITE);
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileTransperceEnvahisseur() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 2), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,4), new Position(7, 3), 1));
+			
+			assertTrue(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+		
+		@Test
+		public void test_MissileAvecVitesseTropGrandeEtTraverseEnvahisseur() {
+			spaceinvaders.setEnvahisseur(new Envahisseur(new Dimension(3,2), new Position(6, 5), 1));
+			spaceinvaders.setMissile(new Missile(new Dimension(1,3), new Position(7, 8), 5));
+			
+			spaceinvaders.getMissile().deplacerVerticalementVers(Direction.BAS);
+			
+			assertFalse(spaceinvaders.getCollision().detecterCollision(spaceinvaders.getMissile(), spaceinvaders.getEnvahisseur()));
+		}
+ }

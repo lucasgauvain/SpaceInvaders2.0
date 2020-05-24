@@ -15,11 +15,13 @@ public class SpaceInvaders implements Jeu {
 	Missile missile;
 	Envahisseur envahisseur;
 	Direction directionEnvahisseur;
+	Collision collision;
 
 	public SpaceInvaders(int longueur, int hauteur) {
 		this.longueur = longueur;
 		this.hauteur = hauteur;
 		this.directionEnvahisseur = Direction.DROITE;
+		this.collision = new Collision();
 	}
 
 	public Vaisseau getVaisseau() {
@@ -42,41 +44,80 @@ public class SpaceInvaders implements Jeu {
 		this.envahisseur = envahisseur;
 	}
 
-	public void initialiserJeu() {
-		Position positionVaisseau = new Position(this.longueur / 2, this.hauteur - 1);
-		Dimension dimensionVaisseau = new Dimension(Constante.VAISSEAU_LONGUEUR, Constante.VAISSEAU_HAUTEUR);
+	public Collision getCollision() {
+		return this.collision;
+	}
 
-		Position positionEnvahisseur = new Position(this.longueur / 2, 79);
-		Dimension dimensionEnvahisseur = new Dimension(Constante.ENVAHISSEUR_LONGUEUR, Constante.ENVAHISSEUR_HAUTEUR);
+	public String recupererEspaceJeuDansChaineASCII() {
+		StringBuilder espaceDeJeu = new StringBuilder();
+		for (int y = 0; y < hauteur; y++) {
+			for (int x = 0; x < longueur; x++) {
+				espaceDeJeu.append(recupererMarqueDeLaPosition(x, y));
+			}
+			espaceDeJeu.append(Constante.MARQUE_FIN_LIGNE);
+		}
+		return espaceDeJeu.toString();
+	}
 
-		positionnerUnNouveauVaisseau(dimensionVaisseau, positionVaisseau, Constante.VAISSEAU_VITESSE);
-		positionnerUnNouveauEnvahisseur(dimensionEnvahisseur, positionEnvahisseur, Constante.ENVAHISSEUR_VITESSE);
+	public char recupererMarqueDeLaPosition(int x, int y) {
+		char marque;
+		if (this.aUnVaisseauQuiOccupeLaPosition(x, y))
+			marque = Constante.MARQUE_VAISSEAU;
+		else if (this.aUnMissileQuiOccupeLaPosition(x, y))
+			marque = Constante.MARQUE_MISSILE;
+		else if (this.aUnEnvahisseurQuiOccupeLaPosition(x, y))
+			marque = Constante.MARQUE_ENVAHISSEUR;
+		else
+			marque = Constante.MARQUE_VIDE;
+		return marque;
+	}
 
+	private boolean aUnEnvahisseurQuiOccupeLaPosition(int x, int y) {
+		return this.aUnEnvahisseur() && envahisseur.occupeLaPosition(x, y);
+	}
+
+	public boolean aUnEnvahisseur() {
+		return envahisseur != null;
+	}
+
+	private boolean aUnMissileQuiOccupeLaPosition(int x, int y) {
+		return this.aUnMissile() && missile.occupeLaPosition(x, y);
+	}
+
+	public boolean aUnMissile() {
+		return missile != null;
+	}
+
+	private boolean aUnVaisseauQuiOccupeLaPosition(int x, int y) {
+		return this.aUnVaisseau() && vaisseau.occupeLaPosition(x, y);
+	}
+
+	public boolean aUnVaisseau() {
+		return vaisseau != null;
+	}
+
+	private boolean estDansEspaceJeu(int x, int y) {
+		return ((x >= 0) && (x < longueur)) && ((y >= 0) && (y < hauteur));
 	}
 
 	public void deplacerVaisseauVersLaDroite() {
 		if (vaisseau.abscisseLaPlusADroite() < (longueur - 1)) {
-			vaisseau.seDeplacerVersLaDroite();
+			vaisseau.deplacerHorizontalementVers(Direction.DROITE);
 			if (!estDansEspaceJeu(vaisseau.abscisseLaPlusADroite(), vaisseau.ordonneeLaPlusHaute())) {
-				vaisseau.positionner(longueur - vaisseau.longueur(), vaisseau.ordonneeLaPlusHaute());
+				vaisseau.positionner(longueur - vaisseau.getDimension().longueur(), vaisseau.ordonneeLaPlusHaute());
 			}
 		}
 	}
 
 	public void deplacerVaisseauVersLaGauche() {
 		if (0 < vaisseau.abscisseLaPlusAGauche())
-			vaisseau.seDeplacerVersLaGauche();
+			vaisseau.deplacerHorizontalementVers(Direction.GAUCHE);
 		if (!estDansEspaceJeu(vaisseau.abscisseLaPlusAGauche(), vaisseau.ordonneeLaPlusHaute())) {
 			vaisseau.positionner(0, vaisseau.ordonneeLaPlusHaute());
 		}
 	}
 
-	public boolean estDansEspaceJeu(int x, int y) {
-		return ((x >= 0) && (x < longueur)) && ((y >= 0) && (y < hauteur));
-	}
-
 	public void positionnerUnNouveauVaisseau(Dimension dimension, Position position, int vitesse) {
-
 		int x = position.abscisse();
 		int y = position.ordonnee();
 
@@ -96,94 +137,6 @@ public class SpaceInvaders implements Jeu {
 		vaisseau = new Vaisseau(dimension, position, vitesse);
 	}
 
-	public void tirerUnMissile(Dimension dimensionMissile, int vitesseMissile) {
-
-		if ((vaisseau.hauteur() + dimensionMissile.hauteur()) > this.hauteur)
-			throw new MissileException(
-					"Pas assez de hauteur libre entre le vaisseau et le haut de l'espace jeu pour tirer le missile");
-
-		this.missile = this.vaisseau.tirerUnMissile(dimensionMissile, vitesseMissile);
-	}
-
-	@Override
-	public void evoluer(Commande commandeUser) {
-
-		this.deplacer(commandeUser);
-
-		if (commandeUser.tir && !this.aUnMissile()) {
-			tirerUnMissile(new Dimension(Constante.MISSILE_LONGUEUR, Constante.MISSILE_HAUTEUR),
-					Constante.MISSILE_VITESSE);
-		}
-
-		if (this.aUnMissile()) {
-			this.deplacerMissile();
-		}
-
-		if (this.aUnEnvahisseur()) {
-			this.deplacerEnvahisseur();
-		}
-
-	}
-
-	@Override
-	public boolean etreFini() {
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		return recupererEspaceJeuDansChaineASCII();
-	}
-
-	public String recupererEspaceJeuDansChaineASCII() {
-		StringBuilder espaceDeJeu = new StringBuilder();
-		for (int y = 0; y < hauteur; y++) {
-			for (int x = 0; x < longueur; x++) {
-				espaceDeJeu.append(recupererMarqueDeLaPosition(x, y));
-			}
-			espaceDeJeu.append(Constante.MARQUE_FIN_LIGNE);
-		}
-		return espaceDeJeu.toString();
-	}
-
-	private char recupererMarqueDeLaPosition(int x, int y) {
-		char marque;
-		if (this.aUnVaisseauQuiOccupeLaPosition(x, y))
-			marque = Constante.MARQUE_VAISSEAU;
-		else if (this.aUnMissileQuiOccupeLaPosition(x, y))
-			marque = Constante.MARQUE_MISSILE;
-		else if (this.aUnEnvahisseurQuiOccupeLaPosition(x, y))
-			marque = Constante.MARQUE_ENVAHISSEUR;
-		else
-			marque = Constante.MARQUE_VIDE;
-		return marque;
-	}
-
-	public boolean aUnMissile() {
-		return missile != null;
-	}
-
-	private boolean aUnMissileQuiOccupeLaPosition(int x, int y) {
-		return this.aUnMissile() && missile.occupeLaPosition(x, y);
-
-	}
-
-	public boolean aUnVaisseau() {
-		return vaisseau != null;
-	}
-
-	private boolean aUnVaisseauQuiOccupeLaPosition(int x, int y) {
-		return this.aUnVaisseau() && vaisseau.occupeLaPosition(x, y);
-	}
-
-	public boolean aUnEnvahisseur() {
-		return envahisseur != null;
-	}
-
-	private boolean aUnEnvahisseurQuiOccupeLaPosition(int x, int y) {
-		return this.aUnEnvahisseur() && envahisseur.occupeLaPosition(x, y);
-	}
-
 	public void deplacer(Commande c) {
 
 		if (c.gauche) {
@@ -196,28 +149,61 @@ public class SpaceInvaders implements Jeu {
 
 	}
 
-	public void deplacerMissile() {
+	public void evoluer(Commande commandeUser) {
 
-		this.missile.deplacerVerticalementVers(Direction.HAUT_ECRAN);
+		this.deplacer(commandeUser);
 
-		if (this.missile.ordonneeLaPlusHaute() <= 0) {
-			this.missile = null;
+		if (commandeUser.tir && !this.aUnMissile()) {
+			tirerUnMissile(new Dimension(Constante.MISSILE_LONGUEUR, Constante.MISSILE_HAUTEUR),
+					Constante.MISSILE_VITESSE);
+		}
+
+		if (this.aUnMissile()) {
+			this.deplacerMissile();
+		}
+		if (this.aUnEnvahisseur()) {
+			this.deplacerEnvahisseur();
 		}
 
 	}
 
-	public void deplacerEnvahisseur() {
-		if (envahisseur.abscisseLaPlusAGauche() == 0 || envahisseur.abscisseLaPlusADroite() == this.longueur - 1) {
-			if (this.directionEnvahisseur.equals(Direction.DROITE)) {
-				this.directionEnvahisseur = Direction.GAUCHE;
-			} else {
-				this.directionEnvahisseur = Direction.DROITE;
-			}
+	public boolean etreFini() {
+		if (null == this.vaisseau) {
+			return true;
 		}
-		if (envahisseur.abscisseLaPlusADroite() < (longueur - 1) || 0 < envahisseur.abscisseLaPlusAGauche()) {
-			envahisseur.deplacerHorizontalementVers(this.directionEnvahisseur);
+		return false;
+	}
+
+	public void initialiserJeu() {
+		Position positionVaisseau = new Position(this.longueur / 2, this.hauteur - 1);
+		Dimension dimensionVaisseau = new Dimension(Constante.VAISSEAU_LONGUEUR, Constante.VAISSEAU_HAUTEUR);
+
+		Position positionEnvahisseur = new Position(this.longueur / 2, 79);
+		Dimension dimensionEnvahisseur = new Dimension(Constante.ENVAHISSEUR_LONGUEUR, Constante.ENVAHISSEUR_HAUTEUR);
+
+		positionnerUnNouveauVaisseau(dimensionVaisseau, positionVaisseau, Constante.VAISSEAU_VITESSE);
+		positionnerUnNouveauEnvahisseur(dimensionEnvahisseur, positionEnvahisseur, Constante.ENVAHISSEUR_VITESSE);
+	}
+
+	public void tirerUnMissile(Dimension dimensionMissile, int vitesseMissile) {
+
+		if ((vaisseau.dimension.hauteur + dimensionMissile.hauteur()) > this.hauteur)
+			throw new MissileException(
+					"Pas assez de hauteur libre entre le vaisseau et le haut de l'espace jeu pour tirer le missile");
+
+		this.missile = this.vaisseau.tirerUnMissile(dimensionMissile, vitesseMissile);
+	}
+
+	public void deplacerMissile() {
+		this.missile.deplacerVerticalementVers(Direction.HAUT_ECRAN);
+		if (this.missile.ordonneeLaPlusHaute() <= 0) {
+			this.missile = null;
 		}
-		positionnerEnvahisseurSiHorsEspaceJeu();
+		if (this.aUnEnvahisseur() && this.aUnMissile() && collision.detecterCollision(this.missile, this.envahisseur)) {
+			this.envahisseur = null;
+			this.missile = null;
+			this.vaisseau = null;
+		}
 	}
 
 	public void positionnerUnNouveauEnvahisseur(Dimension dimension, Position position, int i) {
@@ -238,6 +224,20 @@ public class SpaceInvaders implements Jeu {
 					"L'envahisseur déborde de l'espace jeu vers le bas à cause de sa hauteur");
 
 		envahisseur = new Envahisseur(dimension, position, i);
+	}
+
+	public void deplacerEnvahisseur() {
+		if (envahisseur.abscisseLaPlusAGauche() == 0 || envahisseur.abscisseLaPlusADroite() == this.longueur - 1) {
+			if (this.directionEnvahisseur.equals(Direction.DROITE)) {
+				this.directionEnvahisseur = Direction.GAUCHE;
+			} else {
+				this.directionEnvahisseur = Direction.DROITE;
+			}
+		}
+		if (envahisseur.abscisseLaPlusADroite() < (longueur - 1) || 0 < envahisseur.abscisseLaPlusAGauche()) {
+			envahisseur.deplacerHorizontalementVers(this.directionEnvahisseur);
+		}
+		positionnerEnvahisseurSiHorsEspaceJeu();
 	}
 
 	private void positionnerEnvahisseurSiHorsEspaceJeu() {
